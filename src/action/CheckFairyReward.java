@@ -20,7 +20,7 @@ public class CheckFairyReward
     "/connect/app/menu/fairyrewards?cyt=1";
 
   public static boolean run() throws Exception {
-    if (SellCard.isrun)
+    if (SellCard.isrun || CardCheck.isrun)
       return false;
     if ((!(SellCard.tried)) && 
       (Info.autoSellCards) && 
@@ -75,7 +75,7 @@ public class CheckFairyReward
         throw ex;
       }
       try {
-        while (SellCard.isrun);
+        while (CardCheck.isrun || SellCard.isrun);
         Thread.sleep(10000L);
         Go.log("尝试卖卡");
         SellCard sell = new SellCard();

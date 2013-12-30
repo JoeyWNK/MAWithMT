@@ -34,6 +34,9 @@ public class Connect {
 	public boolean Lock(){
 		return lock;
 	}
+	public void reset(){
+		lock = false;		
+	}
 	//访问请求
 	public byte[] connectToServer(String url, List<NameValuePair> content) throws Exception {
 		lock = true;
@@ -52,12 +55,14 @@ public class Connect {
 		try{
 			b = client.execute(hp,new HttpResponseHandler());
 		} catch (Exception e){
+			lock = false;
 			throw e;
 		}
 		
 		/* end */
 		if (b != null) {
 			if (url.contains("gp_verify_receipt?")) {
+				lock = false;
 				// need to be decoded
 				return null;
 			}
@@ -65,11 +70,13 @@ public class Connect {
 				lock = false;
 				return CryptoCn.decode(b);
 			} catch (Exception ex) {
+				lock = false;
 				throw ex;
 			}
 		} else{
 			connectToServer(url,content);
 		}
+		lock = false;
 		return null;
 	}
 	

@@ -75,6 +75,7 @@ public class Process {
 		try {
 			execute(Think.doIt(getPossibleAction()));
 		} catch (Exception e) {
+			connect.reset();
 			if (e.getMessage() != null) {
 				Go.log(e.getMessage());
 				if (e.getMessage().contains("9000")) {

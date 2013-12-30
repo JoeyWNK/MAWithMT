@@ -8,6 +8,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Scanner;
 
+import javax.swing.JFrame;
+
 import net.Process;
 
 @SuppressWarnings("unused")
@@ -25,7 +27,13 @@ public class Go {
 				GetConfig.readConfig(args[0]);
 			else{
 				GUI gui = new GUI();
-				gui.run();
+				Thread g = new Thread(gui);
+				g.start();
+				gui.pack();
+				gui.setTitle("MAWALKER");
+				gui.setLocationRelativeTo(null);
+				gui.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+				gui.setVisible(true);
 			}
 			System.out.println("加载完成");
 			System.out.println("启动程序……");
@@ -45,17 +53,27 @@ public class Go {
 	public static void log(String msg) {
 		if (msg == null || msg.isEmpty()) 
 			return;
+		if (msg.contains("server")){
+			Process.connect.reset();
+			if (!neterror)
+				neterror = true;
+			else return;
+			msg = "连接错误";
+		}
 		if (msg.contains(".com")||msg.contains("connect")){
+			Process.connect.reset();
 			if (!neterror)
 				neterror = true;
 			else return;
 			msg = "连接错误";
 		}else if(msg.contains("time out")){
+			Process.connect.reset();
 			if (!neterror)
 				neterror = true;
 			else return;
 			msg = "连接超时";
 		}else if(msg.contains("服务器未响应")){
+			Process.connect.reset();
 			if (!neterror)
 				neterror = true;
 			else return;
@@ -114,7 +132,7 @@ public class Go {
 			log("连接恢复");
 		}
 		if (show)
-//		System.out.print((int)time + " ");
+		System.out.print((int)time + " ");
 		waited = true;
 		totaltime = totaltime + time;
 		TimeManager.Check(Integer.parseInt(df.format(new Date()).substring(0, 2)));

@@ -50,7 +50,11 @@ public class GetBattleResult {
 
 		if(Process.info.battleResult.contains("win")){
 			Process.info.cardNum = ((NodeList)xpath.evaluate("//owner_card_list/user_card", doc, XPathConstants.NODESET)).getLength();
-			CreateXML.UserInfo = doc;
+		      CardCheck check = new CardCheck();
+	          check.doc = doc;
+	          Thread T1 = new Thread(check);
+	          T1.setPriority(2);
+	          T1.start();
 		}
 	}
 

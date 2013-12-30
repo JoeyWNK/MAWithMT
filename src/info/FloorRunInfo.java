@@ -34,8 +34,13 @@ public class FloorRunInfo {
 		}else if(event_type.equals("15")){
 			Process.info.event_type = "获得卡片";
 			try{
-				Process.info.cardNum = ((NodeList)xpath.evaluate("//owner_card_list/user_card", doc, XPathConstants.NODESET)).getLength();
-				CreateXML.UserInfo = doc;
+				if(Process.info.cardNum < ((NodeList)xpath.evaluate("//owner_card_list/user_card", doc, XPathConstants.NODESET)).getLength()){
+			      CardCheck check = new CardCheck();
+		          check.doc = doc;
+		          Thread T1 = new Thread(check);
+		          T1.setPriority(2);
+		          T1.start();
+				}
 			}catch(Exception e){
 				if(!Info.devMode){
 					Info.devMode = true;	

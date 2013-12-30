@@ -61,6 +61,12 @@ public class GetConfig {
 			Info.userAgent = xpath.evaluate("/config/user_agent", doc).trim();
 			String server = xpath.evaluate("/config/server", doc).trim();
 			Info.LoginServer = SERVER_PART1 + server + SERVER_PART2;
+			Info.proxyEnable = xpath.evaluate("/config/network/proxy",
+					doc).trim().equals("1") ;
+			if(Info.proxyEnable){
+				Info.proxyHost = xpath.evaluate("/config/network/server", doc);
+				Info.proxyPort = xpath.evaluate("/config/network/port", doc);
+			}
 			System.out.println("[OK]");
 			
 			System.out.print("读取扫描参数");
@@ -244,7 +250,7 @@ public class GetConfig {
 			}
 			System.out.println("[OK]");
 		} catch (Exception e) {
-
+			System.out.println("[Faild]");
 		}
 	}
 

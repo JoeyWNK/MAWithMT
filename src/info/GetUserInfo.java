@@ -1,16 +1,12 @@
 package info;
 
-import java.util.ArrayList;
-
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 
-import start.Go;
 import start.Info;
 
 import net.Process;
@@ -83,41 +79,14 @@ public class GetUserInfo  {
 				Info.lickCost = 2;
 			}
 			Process.info.cardNum = ((NodeList)xpath.evaluate("//owner_card_list/user_card", doc, XPathConstants.NODESET)).getLength();
-		}
-	}
-	public static void CardCheck(Document doc){
-		XPathFactory factory = XPathFactory.newInstance();
-		XPath xpath = factory.newXPath();
-		int cardCount;
-		try {
-			cardCount = ((NodeList)xpath.evaluate("//owner_card_list/user_card", doc, XPathConstants.NODESET)).getLength();
-			ArrayList<UserCardsInfo> CardList = new ArrayList<UserCardsInfo>();
-		System.out.print("获取用户卡组");
-		for (int i = 1; i < cardCount + 1; i++) {
-			UserCardsInfo c = new UserCardsInfo();
-			String p = String.format("//owner_card_list/user_card[%d]", i);
-			c.serialId = Integer.parseInt(xpath.evaluate(p+"/serial_id", doc));
-			c.master_card_id = Integer.parseInt(xpath.evaluate(p+"/master_card_id", doc));
-			c.lv = Integer.parseInt(xpath.evaluate(p+"/lv", doc));
-			c.hp = Integer.parseInt(xpath.evaluate(p+"/hp", doc));
-			c.atk = Integer.parseInt(xpath.evaluate(p+"/power", doc));
-			c.sale_price = Integer.parseInt(xpath.evaluate(p+"/sale_price", doc));
-			c.holography = xpath.evaluate(p+"/holography", doc).equals("1");
-			CardList.add(c);
-			if (i % (int)((cardCount + 1)/10) == 0 )
-				System.out.print(".");
-			}	
-		Process.info.userCardsInfos = CardList;
-		System.out.println("[OK]");
-		} catch (XPathExpressionException e) {
-			Go.log("卡片读取错误/n" + e);
-			if (Info.devMode)
-				CreateXML.createXML(doc, "CardInfo");
-			else{
-				Info.devMode = true;
-				CreateXML.createXML(doc, "CardInfo");
-				Info.devMode = false;
+			if (Process.info.cardNum >= Process.info.cardMax){
+		        CardCheck check = new CardCheck();
+		        check.doc = doc;
+		        Thread T1 = new Thread(check);
+		        T1.setPriority(2);
+		        T1.start();
 			}
+				
 		}
 	}
 

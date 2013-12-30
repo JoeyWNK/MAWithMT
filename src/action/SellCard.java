@@ -44,9 +44,9 @@ public class SellCard
       run();
     }
     isrun = true;
-    while (CardCheck.isrun)
+    while (CardCheck.isrun || Process.info.userCardsInfos.size() != Process.info.cardNum)
       try {
-        Thread.sleep(100L);
+        Thread.sleep(1000);
       } catch (InterruptedException e1) {
         e1.printStackTrace();
       }
@@ -60,43 +60,49 @@ public class SellCard
         fileWriter = new FileWriter("CardSell.log", true);
         fileWriter.write(df.format(new Date()) + "\r\n");
       }
-      for (int i = 0; i < Process.info.userCardsInfos.size(); ++i) {
-        UserCardsInfo card = (UserCardsInfo)Process.info.userCardsInfos.get(i);
-        if ((((!(Info.smartSell)) || ((((card.lv >= 5) || 
-          (card.sale_price <= 60) || (card.sale_price >= 200))) && ((
-          (card.sale_price != 600) || (
-          (card.hp <= 5) && (card.atk <= 5))))))) && ((
-          (!(Info.CanBeSold
-          .contains(card.master_card_id))) || (card.lv >= 5) || 
-          (card.holography)))) {
-          continue;
-        }
-        if ((SellList == "") || (SellList.isEmpty()) || 
-          (SellList == null))
-          SellList = Integer.toString(card.serialId);
-        else
-          SellList = SellList + "," + card.serialId;
-        System.out.print(".");
-        ++number;
-        price += card.sale_price;
-        if (Info.log) {
-          fileWriter.write(card.master_card_id + " " + 
-            card.sale_price + " " + card.lv + "\r\n");
-        }
-      }
-
-      if (Info.log)
-        fileWriter.write("总计 " + number + " 张 " + price + "Gold\r\n");
-      fileWriter.close();
-    } catch (IOException e) {
-      System.out.println("无法生成记录");
-      Info.log = false;
-    }
-    post.add(new BasicNameValuePair("serial_id", SellList));
-    if (number > 0) {
-      tried = false;
-      System.out.println("读取完成，总计 " + number + " 张");
-    } else {
+		for (int i = 0; i < Process.info.userCardsInfos.size(); i++){
+			UserCardsInfo card = Process.info.userCardsInfos.get(i);
+			if (					
+					(
+						(
+							(Info.smartSell && ( card.lv < 5 
+									&& (card.sale_price > 60 && card.sale_price < 200) ||(card.sale_price == 600)
+									&& (card.hp > 5 || card.atk > 5)
+									)
+								)
+							||
+							(Info.CanBeSold.contains(card.master_card_id + "")
+								&& card.lv < 5 									
+							)
+						)
+					)&& !card.holography
+					
+					)
+			{
+				if (SellList == "" || SellList.isEmpty() || SellList == null)
+					SellList = Integer.toString(card.serialId);
+				else
+				SellList += "," + card.serialId;
+				System.out.print(".");
+				number++;
+				price = price + card.sale_price;
+				if(Info.log)
+					fileWriter.write(card.master_card_id +" " + card.sale_price + " " + card.lv +"\r\n");						
+					
+				}
+			}
+		if(Info.log)
+			fileWriter.write("总计 " + number + " 张 " + price + "Gold\r\n");
+			fileWriter.close();
+		} catch(IOException e) {
+			System.out.println("无法生成记录");
+			Info.log = false;
+		}
+		post.add(new BasicNameValuePair("serial_id", SellList));
+		if (number > 0){
+			tried = false;
+			System.out.println("读取完成，总计 " + number + " 张");
+			} else {
       if (!(tried)) {
         System.out.println("无卡可卖,尝试重新登录");
         try {
@@ -132,6 +138,7 @@ public class SellCard
       Thread T1 = new Thread(check);
       T1.start();
       isrun = false;
+      Process.info.events.push(Info.EventType.fairyAppear);
     }
     catch (Exception localException2)
     {

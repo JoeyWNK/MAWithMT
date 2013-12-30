@@ -15,7 +15,6 @@ public class Info {
 
 	
 
-	
 	public static boolean devMode = true ; 
 	public static int key = 2;//RAS公钥
 	
@@ -34,6 +33,9 @@ public class Info {
 	public static int stopRunWhenApLess = 0;
 	public static String autoPoint = "bc";
 	public static String userAgent = "";
+	public static boolean proxyEnable = false;
+	public static String proxyPort = "";
+	public static String proxyHost = "";
 	public static String runFactor = "0";
 	public static int hasPrivateFairyStopRun = 0;
 	public static int hasPrivateFairyStopRunOriginal = 0;
@@ -164,6 +166,7 @@ public class Info {
 	// 卡组信息
 	public static List<CardConfigInfo> cardConfigInfos = new ArrayList<CardConfigInfo>();
 	public static String PVPEvent = "48";
+
 
 	
 	
