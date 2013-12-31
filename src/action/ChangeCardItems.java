@@ -25,7 +25,7 @@ public class ChangeCardItems {
 		al.add(new BasicNameValuePair("lr", lr));
 		try {
 			while (Process.connect.Lock())
-		        Thread.sleep(100L);
+				Thread.sleep(100L);
 			result = Process.connect.connectToServer(URL_CHANGE_CARD_ITEMS, al);
 		} catch (Exception ex) {
 			throw ex;

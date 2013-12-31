@@ -28,7 +28,7 @@ public class BattleAreaBoss {
 		al.add(new BasicNameValuePair("floor_id", Process.info.floorId));
 		try {
 			while (Process.connect.Lock())
-		        Thread.sleep(100L);
+				Thread.sleep(100L);
 			result = Process.connect.connectToServer(BATTLE_AREA_BOSS, al);
 		} catch (Exception ex) {
 			throw ex;

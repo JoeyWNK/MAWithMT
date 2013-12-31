@@ -33,7 +33,8 @@ public class GetBattleResult {
 		String spec = xpath.evaluate(
 				"//private_fairy_reward_list/special_item/after_count", doc);
 		if (spec.length() == 0) {
-			spec = xpath.evaluate("//battle_result/special_item/after_count", doc);
+			spec = xpath.evaluate("//battle_result/special_item/after_count",
+					doc);
 		}
 		if (spec.length() != 0) {
 			Process.info.gather = Integer.parseInt(spec);
@@ -48,13 +49,15 @@ public class GetBattleResult {
 			Process.info.isLvUp = false;
 		}
 
-		if(Process.info.battleResult.contains("win")){
-			Process.info.cardNum = ((NodeList)xpath.evaluate("//owner_card_list/user_card", doc, XPathConstants.NODESET)).getLength();
-		      CardCheck check = new CardCheck();
-	          check.doc = doc;
-	          Thread T1 = new Thread(check);
-	          T1.setPriority(2);
-	          T1.start();
+		if (Process.info.battleResult.contains("win")) {
+			Process.info.cardNum = ((NodeList) xpath.evaluate(
+					"//owner_card_list/user_card", doc, XPathConstants.NODESET))
+					.getLength();
+			if (CardCheck.isrun)
+				Process.cardcheck.interrupt();
+			CardCheck.doc = doc;
+			Process.cardcheck.setPriority(2);
+			Process.cardcheck.start();
 		}
 	}
 

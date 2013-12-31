@@ -30,7 +30,7 @@ public class FairyHistory {
 		al.add(new BasicNameValuePair("user_id", fairyInfo.userId));
 		try {
 			while (Process.connect.Lock())
-		        Thread.sleep(100L);
+				Thread.sleep(100L);
 			result = Process.connect.connectToServer(URL_FAIRY_HISTORY, al);
 		} catch (Exception ex) {
 			throw ex;
@@ -62,36 +62,42 @@ public class FairyHistory {
 					"//fairy_history/fairy/attacker_history/attacker[user_id="
 							+ Process.info.userId + "]", doc,
 					XPathConstants.NODESET);
-			if (    Info.fairyType.contains(fairyInfo.type + "") 
-					&&( !(list.getLength() > 0) /** 未攻击 **/
-							|| (Process.info.bcCurrent 
-									>= Process.info.bcMax - 10)/** BC过多 **/
+			if (Info.fairyType.contains(fairyInfo.type + "")
+					&& (!(list.getLength() > 0)
+							/** 未攻击 **/
+							|| (Process.info.bcCurrent >= Process.info.bcMax - 10)
+							/** BC过多 **/
 							|| (Integer.parseInt(xpath.evaluate(
-									"//fairy_history/fairy/time_limit", doc)) <= 600 
-								&& Process.info.bcCurrent >= 60 /** 将加入判断程序 **/
-								)/** 时间过短 **/
-							|| (Process.info.nextExp 
-									<= Process.info.bcCurrent * 1.2 / 2)/** 快要升级**/
-						)
-						&& (Integer.parseInt(xpath.evaluate(
-								"//fairy_history/fairy/hp", doc)) > 0)
-						&& (Integer.parseInt(xpath.evaluate(
-								"//fairy_history/fairy/time_limit", doc)) > 0
-						)
-					||	(xpath.evaluate("//fairy_history/fairy/discoverer_id", doc).trim().equals(Process.info.userId)
-						&& !(list.getLength() > 0)/**己妖放出**/
-						)
-					
-				) 
-			{
-			fairyInfo.currentHp = Integer.parseInt(xpath.evaluate(
-					"//fairy_history/fairy/hp", doc));
-			fairyInfo.maxHp = Integer.parseInt(xpath.evaluate(
-					"//fairy_history/fairy/hp_max", doc));
-			fairyInfo.LimitTime = Integer.parseInt(xpath.evaluate(
-					"//fairy_history/fairy/time_limit", doc));
-			Process.info.canBattleFairyInfos.add(fairyInfo);	
-			} else return false;
+									"//fairy_history/fairy/time_limit", doc)) <= 600 && Process.info.bcCurrent >= 60 /**
+							 * 
+							 * 将加入判断程序
+							 **/
+							)/** 时间过短 **/
+					|| (Process.info.nextExp <= Process.info.bcCurrent * 1.2 / 2)/**
+					 * 
+					 * 快要升级
+					 **/
+					)
+					&& (Integer.parseInt(xpath.evaluate(
+							"//fairy_history/fairy/hp", doc)) > 0)
+					&& (Integer.parseInt(xpath.evaluate(
+							"//fairy_history/fairy/time_limit", doc)) > 0)
+					|| (xpath
+							.evaluate("//fairy_history/fairy/discoverer_id",
+									doc).trim().equals(Process.info.userId) && !(list
+							.getLength() > 0)/** 己妖放出 **/
+					)
+
+			) {
+				fairyInfo.currentHp = Integer.parseInt(xpath.evaluate(
+						"//fairy_history/fairy/hp", doc));
+				fairyInfo.maxHp = Integer.parseInt(xpath.evaluate(
+						"//fairy_history/fairy/hp_max", doc));
+				fairyInfo.LimitTime = Integer.parseInt(xpath.evaluate(
+						"//fairy_history/fairy/time_limit", doc));
+				Process.info.canBattleFairyInfos.add(fairyInfo);
+			} else
+				return false;
 
 		} catch (Exception ex) {
 			throw ex;

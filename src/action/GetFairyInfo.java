@@ -27,7 +27,7 @@ public class GetFairyInfo {
 		al.add(new BasicNameValuePair("user_id", fairyInfo.userId));
 		try {
 			while (Process.connect.Lock())
-		        Thread.sleep(100L);
+				Thread.sleep(100);
 			result = Process.connect.connectToServer(URL_FAIRY_INFO, al);
 		} catch (Exception ex) {
 			throw ex;
@@ -47,7 +47,7 @@ public class GetFairyInfo {
 	}
 
 	private static boolean parse(Document doc) throws Exception {
-		
+
 		return true;
 	}
 

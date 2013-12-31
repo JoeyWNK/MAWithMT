@@ -31,7 +31,7 @@ public class FloorRun {
 		al.add(new BasicNameValuePair("floor_id", Process.info.floorId));
 		try {
 			while (Process.connect.Lock())
-		        Thread.sleep(100L);
+				Thread.sleep(100);
 			result = Process.connect.connectToServer(URL_AREA_FLOOR, al);
 		} catch (Exception ex) {
 			throw ex;
@@ -58,7 +58,7 @@ public class FloorRun {
 
 			GetUserInfo.getUserInfo(doc, false);
 			FloorRunInfo.floorRunInfo(doc);
-			
+
 		} catch (Exception ex) {
 			throw ex;
 		}

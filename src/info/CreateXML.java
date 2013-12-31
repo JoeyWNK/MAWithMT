@@ -20,16 +20,16 @@ public class CreateXML {
 		StringWriter strWtr = new StringWriter();
 		StreamResult strResult = new StreamResult(strWtr);
 		TransformerFactory tfac = TransformerFactory.newInstance();
-		
-		if (Info.devMode || xmlName.contains("user")){
+
+		if (Info.devMode || xmlName.contains("user")) {
 			try {
 				javax.xml.transform.Transformer t = tfac.newTransformer();
 				t.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
 				t.setOutputProperty(OutputKeys.INDENT, "yes");
 				t.setOutputProperty(OutputKeys.METHOD, "xml"); // xml, html,
 				// text
-				t.setOutputProperty("{http://xml.apache.org/xslt}indent-amount",
-						"4");
+				t.setOutputProperty(
+						"{http://xml.apache.org/xslt}indent-amount", "4");
 				t.transform(new DOMSource(doc.getDocumentElement()), strResult);
 			} catch (Exception e) {
 				System.err.println("XML.toString(Document): " + e);

@@ -28,14 +28,15 @@ public class RewardCheck {
 	public static boolean run() throws Exception {
 		Document doc;
 		try {
-			result = Process.connect.connectToServer(URL_REWARD_LIST, new ArrayList<NameValuePair>());
+			result = Process.connect.connectToServer(URL_REWARD_LIST,
+					new ArrayList<NameValuePair>());
 		} catch (Exception ex) {
 			System.out.println(ex.toString());
 			throw null;
 		}
 		try {
 			while (Process.connect.Lock())
-		        Thread.sleep(100L);
+				Thread.sleep(100);
 			doc = Process.ParseXMLBytes(result);
 		} catch (Exception ex) {
 			System.out.println(ex.toString());
@@ -43,8 +44,8 @@ public class RewardCheck {
 		}
 		CreateXML.createXML(doc, "Rewardlist");
 		try {
-			return parse(doc); 
-			
+			return parse(doc);
+
 		} catch (Exception ex) {
 			System.out.println(ex.toString());
 			throw null;
@@ -59,9 +60,8 @@ public class RewardCheck {
 			if (ExceptionCatch.catchException(doc)) {
 				return false;
 			}
-			
-			NodeList list = (NodeList) xpath.evaluate(
-					"//body/rewardbox", doc,
+
+			NodeList list = (NodeList) xpath.evaluate("//body/rewardbox", doc,
 					XPathConstants.NODESET);
 			for (int i = 0; i < list.getLength(); i++) {
 				Node f = list.item(i).getFirstChild();
@@ -70,31 +70,28 @@ public class RewardCheck {
 				String content = "";
 				int point = 0;
 				do {
-					if(f.getNodeName().equals("id")){
+					if (f.getNodeName().equals("id")) {
 						id = f.getFirstChild().getNodeValue();
-					} else if(f.getFirstChild().getNodeName().equals("type")){
-						type = Integer.parseInt(f.getFirstChild().getNodeValue());
-					} else if(f.getFirstChild().getNodeName().equals("content")){
+					} else if (f.getFirstChild().getNodeName().equals("type")) {
+						type = Integer.parseInt(f.getFirstChild()
+								.getNodeValue());
+					} else if (f.getFirstChild().getNodeName()
+							.equals("content")) {
 						content = f.getFirstChild().getNodeValue();
-					} else if(f.getFirstChild().getNodeName().equals("point")){
-						point = Integer.parseInt(f.getFirstChild().getNodeValue());
-					}else if(f.getFirstChild().getNodeName().equals("id")){
+					} else if (f.getFirstChild().getNodeName().equals("point")) {
+						point = Integer.parseInt(f.getFirstChild()
+								.getNodeValue());
+					} else if (f.getFirstChild().getNodeName().equals("id")) {
 						id = f.getFirstChild().getNodeValue();
-					} 
+					}
 					f = f.getNextSibling();
-				} while (f != null);					
-				if(!(type == 1 
-						|| (type == 4 
-							&& (point > 1999 
-									|| net.Process.info.friendpoint > 40000
-								)
-							)
-						)
-					){
+				} while (f != null);
+				if (!(type == 1 || (type == 4 && (point > 1999 || net.Process.info.friendpoint > 40000)))) {
 					try {
 						ArrayList<NameValuePair> al = new ArrayList<NameValuePair>();
-						al.add(new BasicNameValuePair("notice_id", id+";"));
-						result = Process.connect.connectToServer(URL_GET_REWARD,al );
+						al.add(new BasicNameValuePair("notice_id", id + ";"));
+						result = Process.connect.connectToServer(
+								URL_GET_REWARD, al);
 						Go.log("领取 " + content);
 					} catch (Exception ex) {
 						System.out.println(ex.toString());
@@ -109,4 +106,3 @@ public class RewardCheck {
 	}
 
 }
-

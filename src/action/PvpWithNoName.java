@@ -16,7 +16,8 @@ public class PvpWithNoName {
 	// 获取无名亚瑟
 	private static final String URL_GET_PVP = Info.LoginServer
 			+ "/connect/app/battle/battle?cyt=1";
-//	private static final String URL_Fresh_PVP = Info.LoginServer + "/connect/app/battle/battle_userlist?cyt=1";
+	// private static final String URL_Fresh_PVP = Info.LoginServer +
+	// "/connect/app/battle/battle_userlist?cyt=1";
 	// 返回结果
 	private static byte[] result;
 
@@ -26,15 +27,15 @@ public class PvpWithNoName {
 		al.add(new BasicNameValuePair("battle_type", "0"));
 		al.add(new BasicNameValuePair("event_id", Info.PVPEvent));
 		al.add(new BasicNameValuePair("user_id", nameInfo.userId));
-//		al.add(new BasicNameValuePair("parts_id", "0"));
-//		al.add(new BasicNameValuePair("lake_id", "0"));
-//		ArrayList<NameValuePair> a2 = new ArrayList<NameValuePair>();
-//		a2.add(new BasicNameValuePair("event_id", Info.PVPEvent));
-//		a2.add(new BasicNameValuePair("move", "1"));
+		// al.add(new BasicNameValuePair("parts_id", "0"));
+		// al.add(new BasicNameValuePair("lake_id", "0"));
+		// ArrayList<NameValuePair> a2 = new ArrayList<NameValuePair>();
+		// a2.add(new BasicNameValuePair("event_id", Info.PVPEvent));
+		// a2.add(new BasicNameValuePair("move", "1"));
 		try {
-//			Process.connect.connectToServer(URL_Fresh_PVP, a2);
+			// Process.connect.connectToServer(URL_Fresh_PVP, a2);
 			while (Process.connect.Lock())
-		        Thread.sleep(100L);
+				Thread.sleep(100);
 			result = Process.connect.connectToServer(URL_GET_PVP, al);
 		} catch (Exception ex) {
 			throw ex;

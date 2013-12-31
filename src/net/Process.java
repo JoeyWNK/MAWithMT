@@ -1,10 +1,10 @@
 package net;
 
+import info.CardCheck;
 import info.CardConfigInfo;
 import info.FairyInfo;
 import info.FloorInfo;
 import info.NoNameInfo;
-import info.TimeManager;
 
 import java.io.ByteArrayInputStream;
 import java.math.BigDecimal;
@@ -21,6 +21,7 @@ import start.GetConfig;
 import start.Go;
 import start.Info;
 import start.Think;
+import start.TimeManager;
 import action.ActionRegistry.Action;
 import action.AddFriends;
 import action.BattleAreaBoss;
@@ -48,6 +49,11 @@ public class Process {
 	public static Info info;
 	public static boolean update = false;
 	public static int loop = 0;
+	public static Thread time = new Thread(new TimeManager());
+	public static Thread cardcheck = new Thread(new CardCheck());
+	public static Thread sellcard = new Thread(new SellCard());
+	public static Thread addfriends = new Thread(new AddFriends());
+
 	public Process() {
 		System.out.print("初始化连接");
 		connect = new Connect();
@@ -80,7 +86,8 @@ public class Process {
 				Go.log(e.getMessage());
 				if (e.getMessage().contains("9000")) {
 					try {
-						Thread.sleep(1000 * (long)(Info.sleepTime +  Math.random() * 20));
+						Thread.sleep(1000 * (long) (Info.sleepTime + Math
+								.random() * 20));
 					} catch (InterruptedException e1) {
 						Go.log(e1.getMessage());
 					} finally {
@@ -88,42 +95,44 @@ public class Process {
 						SellCard.tried = false;
 						info.events.push(Info.EventType.cookieOutOfDate);
 					}
-				}else if (e.getMessage().contains("8000")){
-					if(e.getMessage().contains("卡片"))
-						try{
-							info.events.clear();							
-						}finally{
+				} else if (e.getMessage().contains("8000")) {
+					if (e.getMessage().contains("卡片"))
+						try {
+							info.events.clear();
+						} finally {
 							info.events.push(Info.EventType.cardFull);
 						}
-				}else if (e.getMessage().contains("1010") && e.getMessage().contains("消灭") || e.getMessage().contains("逃跑")){
+				} else if (e.getMessage().contains("1010")
+						&& e.getMessage().contains("消灭")
+						|| e.getMessage().contains("逃跑")) {
 					info.canBattleFairyInfos = new ArrayList<FairyInfo>();
 					info.events.push(Info.EventType.fairyAppear);
-				}else if (e.getMessage().contains("103")){
+				} else if (e.getMessage().contains("103")) {
 					info.events.push(Info.EventType.notLoggedIn);
-				}else if (e.getMessage().contains("维护") || e.getMessage().contains("官网")){
+				} else if (e.getMessage().contains("维护")
+						|| e.getMessage().contains("官网")) {
 					try {
-						Thread.sleep(1000 * (long)(10 * 60 +  Math.random() * 20));
+						Thread.sleep(1000 * (long) (10 * 60 + Math.random() * 20));
 					} catch (InterruptedException e1) {
 						Go.log(e1.getMessage());
 					} finally {
 						info.events.clear();
 						info.events.push(Info.EventType.cookieOutOfDate);
 					}
-				}				
+				}
 			} else {
 				if (info.events.isEmpty())
 					info.events.push(Info.EventType.fairyAppear);
-				else{
+				else {
 					info.events.clear();
 					Go.log("服务器未响应");
-					if (!noResponse){
+					if (!noResponse) {
 						noResponse = true;
 						info.events.push(Info.EventType.fairyAppear);
-						}
-					else {
+					} else {
 						noResponse = false;
 						info.events.push(Info.EventType.cookieOutOfDate);
-						}
+					}
 				}
 			}
 		}
@@ -179,32 +188,39 @@ public class Process {
 		case LOGIN:
 			try {
 				if (Login.run()) {
-					if(update){
+					if (update) {
 						System.out.println("");
 						Go.log("保存当前版本号" + Info.userAgent);
-						GetConfig.saveConfig(Info.userAgent , 1030);
+						GetConfig.saveConfig(Info.userAgent, 1030);
 						update = false;
 					}
-					Go.log("cookie:" + info.cookie);					
-					String str = ("登陆成功 用户:" + info.userName + " 等级:" + info.userLv
-							+ " AP:" + info.apCurrent + "/" + info.apMax
-							+ " BC:" + info.bcCurrent + "/" + info.bcMax
-							+ " 卡:" + info.cardNum + "/" + info.cardMax							
-							+ " 友情点:" + info.friendpoint);
-					if (info.friends != info.friendMax && info.invitations > 0 )
-						str = str + " 好友:" + info.friends + "(+"+ info.invitations + ")/" + info.friendMax;
+					if (!TimeManager.isrun) {
+						time.setPriority(1);
+						time.start();
+					}
+					Go.log("cookie:" + info.cookie);
+					String str = ("登陆成功 用户:" + info.userName + " 等级:"
+							+ info.userLv + " AP:" + info.apCurrent + "/"
+							+ info.apMax + " BC:" + info.bcCurrent + "/"
+							+ info.bcMax + " 卡:" + info.cardNum + "/"
+							+ info.cardMax + " 友情点:" + info.friendpoint);
+					if (info.friends != info.friendMax && info.invitations > 0)
+						str = str + " 好友:" + info.friends + "(+"
+								+ info.invitations + ")/" + info.friendMax;
 					else
-						str = str + " 好友:" + info.friends + "/" + info.friendMax;
+						str = str + " 好友:" + info.friends + "/"
+								+ info.friendMax;
 					if (info.gather != 0)
 						str = str + " 收集品:" + info.gather;
 					Go.log(str);
-//					if(loop == 0)
-//					RewardCheck.run();
-					if (!SellCard.tried && info.cardNum >= info.cardMax){
-						Go.log("现有卡片 " + info.cardNum +"/"+ info.cardMax + " ,开始卖卡或合成");
+					// if(loop == 0)
+					// RewardCheck.run();
+					if (!SellCard.tried && info.cardNum >= info.cardMax) {
+						Go.log("现有卡片 " + info.cardNum + "/" + info.cardMax
+								+ " ,开始卖卡或合成");
 						info.events.push(Info.EventType.cardFull);
 						break;
-						}
+					}
 					info.events.push(Info.EventType.fairyAppear);
 				} else {
 					info.events.push(Info.EventType.notLoggedIn);
@@ -215,7 +231,7 @@ public class Process {
 			}
 			break;
 		case GET_FAIRY_LIST:
-			if (info.nextExp <= 3 * info.apCurrent * 1.2){
+			if (info.nextExp <= 3 * info.apCurrent * 1.2) {
 				Info.hasPrivateFairyStopRun = 0;
 			}
 			if (info.freeApBcPoint > 0) {
@@ -242,31 +258,34 @@ public class Process {
 					info.events.push(Info.EventType.getNoNameList);
 					break;
 				}
-/**				if(loop % 140 == 0)
-					RewardCheck.run();
-				if (loop < Integer.MAX_VALUE -10 )
-				loop ++; **/
-				if (info.friends != info.friendMax && info.invitations > 0 ){
+				/**
+				 * if(loop % 140 == 0) RewardCheck.run(); if (loop <
+				 * Integer.MAX_VALUE -10 ) loop ++;
+				 **/
+				if (info.friends != info.friendMax && info.invitations > 0) {
 					info.events.push(Info.EventType.addFriends);
 					break;
 				}
-				if(CheckFairyReward.run()){
+				if (CheckFairyReward.run()) {
 					info.events.push(Info.EventType.fairyAppear);
 					break;
 				}
-					
+
 				double wait = Info.waitTime + Info.timepoverty + 2
 						* Math.random();
 				if (wait > 300)
-					wait = 300;				
-				Thread.sleep((long) (1000 * wait));				
-				if (Info.timepoverty < Info.timepovertyMAX && Info.timepoverty!=0)
-					Info.timepoverty = (0.9 + Math.random()*0.6) * Info.timepoverty;
-				else{
-					Info.timepoverty = (0.8 + Math.random()*0.3) * Info.timepoverty;
+					wait = 300;
+				Thread.sleep((long) (1000 * wait));
+				if (Info.timepoverty < Info.timepovertyMAX
+						&& Info.timepoverty != 0)
+					Info.timepoverty = (0.9 + Math.random() * 0.6)
+							* Info.timepoverty;
+				else {
+					Info.timepoverty = (0.8 + Math.random() * 0.3)
+							* Info.timepoverty;
 				}
 				info.events.push(Info.EventType.fairyAppear);
-				Go.log(wait,true);
+				Go.log(wait, true);
 			}
 			break;
 		case GET_NONAME_LIST:
@@ -280,17 +299,18 @@ public class Process {
 			}
 			break;
 		case PVP:
-			if (info.nextExp <= 3 * info.apCurrent * 1.2){
+			if (info.nextExp <= 3 * info.apCurrent * 1.2) {
 				Info.hasPrivateFairyStopRun = 0;
 			}
-			try{
+			try {
 				ChangeCardItems.run(Info.pvpCard, Info.pvpLr);
-			}catch(Exception e){
-				if (e.toString().contains("8000") && e.toString().contains("储存失败")){
+			} catch (Exception e) {
+				if (e.toString().contains("8000")
+						&& e.toString().contains("储存失败")) {
 					Info.pvpCard = Info.wolf;
 					Info.pvpLr = Info.wolfLr;
-					}
-			}			
+				}
+			}
 			for (NoNameInfo noName : info.noNameList) {
 				// 如果ap大于当前地图所需cost则开始跑图
 				if (info.apCurrent >= info.floorCost && Info.isRun.equals("1")
@@ -310,10 +330,9 @@ public class Process {
 				if (PvpWithNoName.run(noName)) {
 					if (info.isLvUp) {
 						Go.log("升级了！");
-						String str = ("战斗结果:" + info.battleResult
-								+ " 金币:" + info.gold + " AP:"
-								+ info.apCurrent + "/" + info.apMax + " BC:"
-								+ info.bcCurrent + "/" + info.bcMax);
+						String str = ("战斗结果:" + info.battleResult + " 金币:"
+								+ info.gold + " AP:" + info.apCurrent + "/"
+								+ info.apMax + " BC:" + info.bcCurrent + "/" + info.bcMax);
 						if (info.gather != 0)
 							str = str + " 收集品:" + info.gather;
 						Go.log(str);
@@ -321,10 +340,10 @@ public class Process {
 						break;
 					} else {
 						String str = ("战斗结果:" + info.battleResult + " 经验:"
-								+ info.exp + "/" + info.nextExp + " 金币:" + info.gold + " AP:"
-								+ info.apCurrent + "/" + info.apMax + " BC:"
-								+ info.bcCurrent + "/" + info.bcMax);
-						if (info.gather !=0)
+								+ info.exp + "/" + info.nextExp + " 金币:"
+								+ info.gold + " AP:" + info.apCurrent + "/"
+								+ info.apMax + " BC:" + info.bcCurrent + "/" + info.bcMax);
+						if (info.gather != 0)
 							str = str + " 收集品:" + info.gather;
 						Go.log(str);
 					}
@@ -347,7 +366,7 @@ public class Process {
 			}
 			break;
 		case FAIRY_HISTORY:
-			if (info.nextExp <= 3 * info.apCurrent * 1.2){
+			if (info.nextExp <= 3 * info.apCurrent * 1.2) {
 				Info.hasPrivateFairyStopRun = 0;
 			}
 			for (FairyInfo fairyInfo : info.fairyInfos) {
@@ -374,75 +393,76 @@ public class Process {
 					info.events.push(Info.EventType.getNoNameList);
 					break;
 				}
-				
-				if (info.friends != info.friendMax && info.invitations > 0 ){
+
+				if (info.friends != info.friendMax && info.invitations > 0) {
 					info.events.push(Info.EventType.addFriends);
 					break;
 				}
-				
-				if(CheckFairyReward.run()){
+
+				if (CheckFairyReward.run()) {
 					info.events.push(Info.EventType.fairyAppear);
 					break;
 				}
-				
+
 				double wait = Info.waitTime + Info.timepoverty + 2
 						* Math.random();
-				
+
 				if (wait > 300)
-					wait = 300;				
+					wait = 300;
 				Thread.sleep((long) (1000 * wait));
-				if (Info.timepoverty < Info.timepovertyMAX  && Info.timepoverty!=0)
-					Info.timepoverty = (0.9 + Math.random()*0.6) * Info.timepoverty;
-				else{
-					Info.timepoverty = (0.8 + Math.random()*0.3) * Info.timepoverty;
+				if (Info.timepoverty < Info.timepovertyMAX
+						&& Info.timepoverty != 0)
+					Info.timepoverty = (0.9 + Math.random() * 0.6)
+							* Info.timepoverty;
+				else {
+					Info.timepoverty = (0.8 + Math.random() * 0.3)
+							* Info.timepoverty;
 				}
 				info.events.push(Info.EventType.fairyAppear);
-				Go.log(wait,true);
+				Go.log(wait, true);
 				break;
 			}
 		case PRIVATE_FAIRY_BATTLE:
-	        if ((!(SellCard.tried)) && (info.cardNum >= info.cardMax) && 
-	                (!(SellCard.isrun))) {
-	                Go.log("现有卡片 " + info.cardNum + "/" + info.cardMax + 
-	                  " ,开始卖卡或合成");
-	                SellCard sell = new SellCard();
-		            Thread T1 = new Thread(sell);
-	                T1.setPriority(2);
-	                T1.start();
-	              }
+			if ((!(SellCard.tried)) && (info.cardNum >= info.cardMax)
+					&& (!(SellCard.isrun))) {
+				Go.log("现有卡片 " + info.cardNum + "/" + info.cardMax
+						+ " ,开始卖卡或合成");
+				sellcard.setPriority(2);
+				sellcard.start();
+			}
 			if (Info.timepoverty > 2 && Info.timepoverty < 20)
 				Info.timepoverty = Info.timepoverty
-						/ info.canBattleFairyInfos.size() + 1 + Math.random() * 10;
-			else{
-				if(Info.timepoverty!=0)
-				Info.timepoverty = 8;
+						/ info.canBattleFairyInfos.size() + 1 + Math.random()
+						* 10;
+			else {
+				if (Info.timepoverty != 0)
+					Info.timepoverty = 8;
 			}
-			if (info.canBattleFairyInfos.size() > 20){
+			if (info.canBattleFairyInfos.size() > 20) {
 				Go.log("发现异常");
 				info.canBattleFairyInfos = new ArrayList<FairyInfo>();
 				info.events.push(Info.EventType.fairyAppear);
 				break;
-				}
+			}
 			String msg2 = "";
 			if (info.canBattleFairyInfos.size() > 0)
-				msg2 =("发现妖精！共计" + info.canBattleFairyInfos.size() + "只");
+				msg2 = ("发现妖精！共计" + info.canBattleFairyInfos.size() + "只");
 			if (info.fairyRewardCount > 0)
 				msg2 = msg2 + (" 未领奖励:" + info.fairyRewardCount);
 			Go.log(msg2);
 			for (FairyInfo fairyInfo : info.canBattleFairyInfos) {
 				if (info.bcCurrent < 2) {
-					Go.log("当前BC" + (Info.lickCost - info.bcCurrent) + "，等待回复……");
+					Go.log("当前BC" + (Info.lickCost - info.bcCurrent)
+							+ "，等待回复……");
 					Thread.sleep(1000 * 60 * (Info.lickCost - info.bcCurrent));
 				}
-		        if ((!(SellCard.tried)) && (info.cardNum >= info.cardMax) && 
-		                (!(SellCard.isrun))) {
-		                Go.log("现有卡片 " + info.cardNum + "/" + info.cardMax + 
-		                  " ,开始卖卡或合成");
-		                SellCard sell = new SellCard();
-			            Thread T1 = new Thread(sell);
-		                T1.setPriority(2);
-		                T1.start();
-		              }
+				if ((!(SellCard.tried)) && (info.cardNum >= info.cardMax)
+						&& (!(SellCard.isrun))) {
+					Go.log("现有卡片 " + info.cardNum + "/" + info.cardMax
+							+ " ,开始卖卡或合成");
+					sellcard.setPriority(2);
+					sellcard.start();
+				}
 				BigDecimal i = BigDecimal.valueOf(fairyInfo.currentHp).divide(
 						BigDecimal.valueOf(fairyInfo.maxHp), 2,
 						BigDecimal.ROUND_HALF_DOWN);
@@ -461,13 +481,14 @@ public class Process {
 								&& info.bcCurrent >= cardConfigInfo.cardCost
 								&& i.doubleValue() >= cardConfigInfo.hp
 								&& cardConfigInfo.wake == 1) {
-							try{
+							try {
 								ChangeCardItems.run(cardConfigInfo.cardItem,
-									cardConfigInfo.cardLr);
-							}catch(Exception e){
-								if (e.toString().contains("8000") && e.toString().contains("失败")){
+										cardConfigInfo.cardLr);
+							} catch (Exception e) {
+								if (e.toString().contains("8000")
+										&& e.toString().contains("失败")) {
 									Info.cardConfigInfos.remove(cardConfigInfo);
-									}
+								}
 							}
 							break;
 						}
@@ -479,13 +500,14 @@ public class Process {
 								&& info.bcCurrent >= cardConfigInfo.cardCost
 								&& i.doubleValue() >= cardConfigInfo.hp
 								&& cardConfigInfo.wake == 0) {
-							try{
+							try {
 								ChangeCardItems.run(cardConfigInfo.cardItem,
-									cardConfigInfo.cardLr);
-							}catch(Exception e){
-								if (e.toString().contains("8000") && e.toString().contains("失败")){
+										cardConfigInfo.cardLr);
+							} catch (Exception e) {
+								if (e.toString().contains("8000")
+										&& e.toString().contains("失败")) {
 									Info.cardConfigInfos.remove(cardConfigInfo);
-									}
+								}
 							}
 							break;
 						}
@@ -493,34 +515,33 @@ public class Process {
 				}
 				if (FairyBattle.run(fairyInfo)) {
 					if (info.isLvUp) {
-						String str = ("战斗结果:" + info.battleResult
-								+ " 金币:" + info.gold + " AP:"
-								+ info.apCurrent + "/" + info.apMax + " BC:"
-								+ info.bcCurrent + "/" + info.bcMax);
+						String str = ("战斗结果:" + info.battleResult + " 金币:"
+								+ info.gold + " AP:" + info.apCurrent + "/"
+								+ info.apMax + " BC:" + info.bcCurrent + "/" + info.bcMax);
 						if (info.gather != 0)
 							str = str + " 收集品:" + info.gather;
 						Go.log(str);
 						Go.log("升级了！");
-						if(!TimeManager.found || TimeManager.done)
+						if (!TimeManager.found || TimeManager.done)
 							Info.hasPrivateFairyStopRun = Info.hasPrivateFairyStopRunOriginal;
 						info.events.push(Info.EventType.levelUp);
 						break;
 					} else {
 						String str = ("战斗结果:" + info.battleResult + " 经验:"
-								+ info.exp + "/" + info.nextExp + " 金币:" + info.gold + " AP:"
-								+ info.apCurrent + "/" + info.apMax + " BC:"
-								+ info.bcCurrent + "/" + info.bcMax);
+								+ info.exp + "/" + info.nextExp + " 金币:"
+								+ info.gold + " AP:" + info.apCurrent + "/"
+								+ info.apMax + " BC:" + info.bcCurrent + "/" + info.bcMax);
 						if (info.gather != 0)
 							str = str + " 收集品:" + info.gather;
 						Go.log(str);
 					}
 				}
-				// 如果BC不足2，则等待两分钟			
+				// 如果BC不足2，则等待两分钟
 				Go.log("等待战斗CD……");
 				Thread.sleep((long) (1000 * (15 + Math.random() * 2)));
-				
+
 			}
-			
+
 			// 重置
 			info.canBattleFairyInfos = new ArrayList<FairyInfo>();
 			info.events.push(Info.EventType.fairyAppear);
@@ -543,37 +564,42 @@ public class Process {
 				FloorInfo floorInfo = null;
 				boolean isClear = false;
 				if (info.floorInfos.size() > 0) {
-					if (Info.dayFirst.equals("1") && Info.runFactor.equals("1") || Info.maptimelimitUp != -1 ) {
+					if (Info.dayFirst.equals("1") && Info.runFactor.equals("1")
+							|| Info.maptimelimitUp != -1) {
 						for (FloorInfo fInfo : info.floorInfos) {
-							if(Info.maptimelimitUp != -1){
-								if (fInfo.name.contains("奖励")){
+							if (Info.maptimelimitUp != -1) {
+								if (fInfo.name.contains("奖励")) {
 									Go.log("限时秘境完成");
 									floorInfo = fInfo;
 									TimeManager.done = true;
 									break;
-									}
-								if (fInfo.name.contains("限时")){
-									Go.log("优先限时秘境");								
-									Info.hasPrivateFairyStopRun = 0;
-									floorInfo = fInfo;								
-									Info.maptimelimit = true;								
-									TimeManager.found =true;
-									break;
-									}
 								}
-							if (Info.dayFirst.equals("1") && fInfo.id.contains("5000")) {
+								if (fInfo.name.contains("限时")) {
+									Go.log("优先限时秘境");
+									Info.hasPrivateFairyStopRun = 0;
+									floorInfo = fInfo;
+									Info.maptimelimit = true;
+									TimeManager.found = true;
+									break;
+								}
+							}
+							if (Info.dayFirst.equals("1")
+									&& fInfo.id.contains("5000")) {
 								floorInfo = fInfo;
 								break;
 							}
 
 							else {
-								if (!Process.info.hasPartyFairy && fInfo.race_type.equals("12") && Info.canRun == 0  ){
+								if (!Process.info.hasPartyFairy
+										&& fInfo.race_type.equals("12")
+										&& Info.canRun == 0) {
 									floorInfo = fInfo;
-									} 
-								if (!fInfo.race_type.equals("12") && !fInfo.id.contains("5000") ){
-									floorInfo = fInfo;
-									}
 								}
+								if (!fInfo.race_type.equals("12")
+										&& !fInfo.id.contains("5000")) {
+									floorInfo = fInfo;
+								}
+							}
 							floorInfo = fInfo;
 						}
 						GetFloorInfo.run(floorInfo, false);
@@ -581,16 +607,19 @@ public class Process {
 						if (Info.whatMap == 0) {
 							GetAreaInfo.run(true);
 							for (FloorInfo fInfo : info.floorInfos) {
-								if (!Process.info.hasPartyFairy && fInfo.race_type.equals("12") && Info.canRun == 0  ){
+								if (!Process.info.hasPartyFairy
+										&& fInfo.race_type.equals("12")
+										&& Info.canRun == 0) {
 									floorInfo = fInfo;
 									break;
-									} 
-								if (!fInfo.race_type.equals("12") && !fInfo.id.contains("5000") ){
+								}
+								if (!fInfo.race_type.equals("12")
+										&& !fInfo.id.contains("5000")) {
 									floorInfo = fInfo;
 									break;
-									}
+								}
 							}
-							GetFloorInfo.run(floorInfo, false);	
+							GetFloorInfo.run(floorInfo, false);
 						} else {
 							floorInfo = info.floorInfos.get(Info.whatMap);
 							GetFloorInfo.run(floorInfo, true);
@@ -600,14 +629,17 @@ public class Process {
 					GetAreaInfo.run(true);
 					if (Info.whatMap == 0) {
 						for (FloorInfo fInfo : info.floorInfos) {
-							if (!Process.info.hasPartyFairy && fInfo.race_type.equals("12") && Info.canRun == 0  ){
+							if (!Process.info.hasPartyFairy
+									&& fInfo.race_type.equals("12")
+									&& Info.canRun == 0) {
 								floorInfo = fInfo;
 								break;
-								} 
-							if (!fInfo.race_type.equals("12") && !fInfo.id.contains("5000") ){
+							}
+							if (!fInfo.race_type.equals("12")
+									&& !fInfo.id.contains("5000")) {
 								floorInfo = fInfo;
 								break;
-								}
+							}
 						}
 					} else {
 						floorInfo = info.floorInfos.get(Info.whatMap);
@@ -615,50 +647,52 @@ public class Process {
 					GetFloorInfo.run(floorInfo, true);
 					isClear = true;
 				}
-		        if ((!(SellCard.tried)) && (info.cardNum >= info.cardMax) && 
-		                (!(SellCard.isrun))) {
-		                Go.log("现有卡片 " + info.cardNum + "/" + info.cardMax + 
-		                  " ,开始卖卡或合成");
-		                SellCard sell = new SellCard();
-			            Thread T1 = new Thread(sell);
-		                T1.setPriority(2);
-		                T1.start();
-		              }	
+				if ((!(SellCard.tried)) && (info.cardNum >= info.cardMax)
+						&& (!(SellCard.isrun))) {
+					Go.log("现有卡片 " + info.cardNum + "/" + info.cardMax
+							+ " ,开始卖卡或合成");
+					sellcard.setPriority(2);
+					sellcard.start();
+				}
 				Go.log("获取地图完毕,探索:" + floorInfo.name);
 				if (!info.floorId.equals("") && info.floorCost != 0) {
 					if (info.apCurrent < info.floorCost) {
 						Go.log("AP不足" + info.floorCost);
 						info.events.push(Info.EventType.fairyAppear);
 						break;
-					} if (info.apCurrent < Info.stopRunWhenApLess + info.floorCost && !Info.maptimelimit){
+					}
+					if (info.apCurrent < Info.stopRunWhenApLess
+							+ info.floorCost
+							&& !Info.maptimelimit) {
 						info.floorCost += Info.stopRunWhenApLess;
 						Go.log("AP不足" + Info.stopRunWhenApLess);
 						info.events.push(Info.EventType.fairyAppear);
 						break;
-						}
-					else {
+					} else {
 						while (FloorRun.run(floorInfo)) {
-							String msg = (floorInfo.name+" 第"+info.floorId+"层"+info.progress+"% 消耗AP"+info.floorCost
-									+" 经验:"+info.getExp + "/" + info.nextExp 
-									+" 金币:"+info.runGold );
+							String msg = (floorInfo.name + " 第" + info.floorId
+									+ "层" + info.progress + "% 消耗AP"
+									+ info.floorCost + " 经验:" + info.getExp
+									+ "/" + info.nextExp + " 金币:" + info.runGold);
 
-							if (!info.event_type.equals("0")){
+							if (!info.event_type.equals("0")) {
 								if (info.event_type.equals("获得道具"))
 									msg += (" 收集品:" + info.gather);
 								else if (info.event_type.equals("遇到小伙伴"))
 									msg += (" 友情点:" + info.friendpoint);
 								else
-									msg += (" 事件:"+info.event_type);								
+									msg += (" 事件:" + info.event_type);
 							}
-							msg += 	(" AP:"+info.apCurrent+ "/" +info.apMax 
-									+" BC:"+info.bcCurrent + "/" + info.bcMax);
+							msg += (" AP:" + info.apCurrent + "/" + info.apMax
+									+ " BC:" + info.bcCurrent + "/" + info.bcMax);
 							Go.log(msg);
-							if(floorInfo.name.contains("限时")){
+							if (floorInfo.name.contains("限时")) {
 								Info.hasPrivateFairyStopRun = 0;
 								Info.maptimelimit = true;
 								TimeManager.found = true;
 							}
-							if (info.nextExp <= info.getExp * info.apCurrent / info.floorCost * 1.2){
+							if (info.nextExp <= info.getExp * info.apCurrent
+									/ info.floorCost * 1.2) {
 								Info.hasPrivateFairyStopRun = 0;
 							}
 							// 地图踏破则更新楼层
@@ -678,7 +712,7 @@ public class Process {
 							// 地图clear则重新获取地图
 							if (info.areaClear == 1 && !isClear) {
 								info.events.push(Info.EventType.needFloorInfo);
-								if (Info.maptimelimit){
+								if (Info.maptimelimit) {
 									Info.hasPrivateFairyStopRun = 1;
 								}
 								break;
@@ -689,7 +723,9 @@ public class Process {
 								info.events.push(Info.EventType.fairyAppear);
 								break;
 							}
-							if (info.apCurrent < Info.stopRunWhenApLess + info.floorCost && !Info.maptimelimit){
+							if (info.apCurrent < Info.stopRunWhenApLess
+									+ info.floorCost
+									&& !Info.maptimelimit) {
 								info.floorCost += Info.stopRunWhenApLess;
 								Go.log("AP不足" + info.floorCost);
 								info.events.push(Info.EventType.fairyAppear);
@@ -701,81 +737,78 @@ public class Process {
 								info.events.push(Info.EventType.fairyAppear);
 								break;
 							}
-							if (!(info.apCurrent >= info.floorCost && Info.isRun.equals("1")
+							if (!(info.apCurrent >= info.floorCost
+									&& Info.isRun.equals("1")
 									&& info.bcCurrent < Info.stopRunWhenBcMore
-									&& Info.canRun == 1 || info.apCurrent > info.apMax - 10)){
+									&& Info.canRun == 1 || info.apCurrent > info.apMax - 10)) {
 								Go.log("停止跑图");
 								info.events.push(Info.EventType.fairyAppear);
 								break;
 							}
-					        if ((!(SellCard.tried)) && (info.cardNum >= info.cardMax) && 
-					                (!(SellCard.isrun))) {
-					                Go.log("现有卡片 " + info.cardNum + "/" + info.cardMax + 
-					                  " ,开始卖卡或合成");
-					                SellCard sell = new SellCard();
-						            Thread T1 = new Thread(sell);
-					                T1.setPriority(2);
-					                T1.start();
-					              }
+							if ((!(SellCard.tried))
+									&& (info.cardNum >= info.cardMax)
+									&& (!(SellCard.isrun))) {
+								Go.log("现有卡片 " + info.cardNum + "/"
+										+ info.cardMax + " ,开始卖卡或合成");
+								sellcard.setPriority(2);
+								sellcard.start();
+							}
 							Thread.sleep((long) (1000 * Math.random()));
 						}
 					}
 				} else {
 					if (info.bossId != 0) {
 						Go.log("秘境守护者出现！");
-						try{
-							ChangeCardItems.run(Info.battleBoss, Info.battleBossLr);
-						}catch(Exception e){
-							if (e.toString().contains("8000") && e.toString().contains("储存失败")){
+						try {
+							ChangeCardItems.run(Info.battleBoss,
+									Info.battleBossLr);
+						} catch (Exception e) {
+							if (e.toString().contains("8000")
+									&& e.toString().contains("储存失败")) {
 								Info.battleBoss = Info.wolf;
 								Info.battleBossLr = Info.wolfLr;
-								}
+							}
 						}
 						if (BattleAreaBoss.run(floorInfo)) {
-						info.events.push(Info.EventType.needFloorInfo);
-						break;
+							info.events.push(Info.EventType.needFloorInfo);
+							break;
 						}
-						
+
 					}
-			}
+				}
 			} else {
 				info.events.push(Info.EventType.fairyAppear);
 			}
 			break;
 		case SELL_CARD:
 			try {
-		        if (!(SellCard.isrun)) {
-		            Go.log("尝试卖卡");
-		            SellCard sell = new SellCard();
-		            Thread T1 = new Thread(sell);
-		            T1.setPriority(2);
-		            T1.start();
-		          }
-			}
-			catch (Exception ex){
+				if (!(SellCard.isrun)) {
+					Go.log("尝试卖卡");
+					sellcard.setPriority(2);
+					sellcard.start();
+				}
+			} catch (Exception ex) {
 				throw ex;
 			}
 			info.events.push(Info.EventType.fairyAppear);
 			break;
 		case ADD_FRIENDS:
-		     if ((info.friends == info.friendMax) || (info.invitations == 0) || AddFriends.isrun) {
-		         info.events.push(Info.EventType.fairyAppear);
-		         return;
-		       }
-		       try {
-		         Go.log("获取好友列表");
-		         AddFriends friend = new AddFriends();
-		         Thread T1 = new Thread(friend);
-		         T1.setPriority(2);
-		         T1.start();
-		       }
-			catch (Exception ex){
+			if ((info.friends == info.friendMax) || (info.invitations == 0)
+					|| AddFriends.isrun) {
+				info.events.push(Info.EventType.fairyAppear);
+				return;
+			}
+			try {
+				Go.log("获取好友列表");
+				addfriends.setPriority(2);
+				addfriends.start();
+			} catch (Exception ex) {
 				throw ex;
 			}
 			info.events.push(Info.EventType.fairyAppear);
 			break;
 		default:
-			Thread.sleep((long) (( 10 * Math.random() ) * 1000));
+			Thread.sleep((long) ((10 * Math.random()) * 1000));
 			info.events.push(Info.EventType.fairyAppear);
 		}
 	}

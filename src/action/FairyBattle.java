@@ -29,7 +29,7 @@ public class FairyBattle {
 		al.add(new BasicNameValuePair("user_id", fairyInfo.userId));
 		try {
 			while (Process.connect.Lock())
-		        Thread.sleep(100L);
+				Thread.sleep(100L);
 			result = Process.connect.connectToServer(URL_FAIRY_BATTLE, al);
 		} catch (Exception ex) {
 			throw ex;

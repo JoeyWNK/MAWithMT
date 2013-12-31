@@ -21,7 +21,7 @@ public class ReturnMain {
 		ArrayList<NameValuePair> al = new ArrayList<NameValuePair>();
 		try {
 			while (Process.connect.Lock())
-		        Thread.sleep(100L);
+				Thread.sleep(100);
 			result = Process.connect.connectToServer(URL_LOGIN, al);
 		} catch (Exception ex) {
 			throw ex;

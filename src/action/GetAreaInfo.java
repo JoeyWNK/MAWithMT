@@ -31,7 +31,7 @@ public class GetAreaInfo {
 		ArrayList<NameValuePair> al = new ArrayList<NameValuePair>();
 		try {
 			while (Process.connect.Lock())
-		        Thread.sleep(100L);
+				Thread.sleep(100L);
 			result = Process.connect.connectToServer(URL_AREA_INFO, al);
 		} catch (Exception ex) {
 			throw ex;

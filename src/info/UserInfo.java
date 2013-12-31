@@ -1,13 +1,13 @@
 package info;
 
 public class UserInfo {
-		  public String id = "";
+	public String id = "";
 
-		  public String name = "";
+	public String name = "";
 
-		  public int cost = 0;
+	public int cost = 0;
 
-		  public int level = 0;
+	public int level = 0;
 
-		  public String last_login = "";
+	public String last_login = "";
 }

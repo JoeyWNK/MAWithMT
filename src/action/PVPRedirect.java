@@ -19,11 +19,11 @@ public class PVPRedirect {
 	public static boolean run() throws Exception {
 		Document doc;
 		ArrayList<NameValuePair> al = new ArrayList<NameValuePair>();
-		al.add(new BasicNameValuePair("event_id","48"));
-		al.add(new BasicNameValuePair("move","1"));
+		al.add(new BasicNameValuePair("event_id", "48"));
+		al.add(new BasicNameValuePair("move", "1"));
 		try {
 			while (Process.connect.Lock())
-		        Thread.sleep(100L);
+				Thread.sleep(100);
 			result = Process.connect.connectToServer(URL_GET_REDIRECT, al);
 		} catch (Exception ex) {
 			throw ex;

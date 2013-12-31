@@ -27,7 +27,7 @@ public class GetFloorInfo {
 		al.add(new BasicNameValuePair("area_id", floorInfo.id));
 		try {
 			while (Process.connect.Lock())
-		        Thread.sleep(100L);
+				Thread.sleep(100L);
 			result = Process.connect.connectToServer(URL_AREA_FLOOR, al);
 		} catch (Exception ex) {
 			throw ex;
